@@ -23,5 +23,5 @@ class UIUtils {
   static void hideLoading(BuildContext context) => Navigator.of(context).pop();
 
   static void showMessage(String message) =>
-      Fluttertoast.showToast(msg: message, toastLength: Toast.LENGTH_SHORT);
+      Fluttertoast.showToast(msg: message, toastLength: Toast.LENGTH_LONG);
 }
