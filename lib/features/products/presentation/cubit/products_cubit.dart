@@ -8,6 +8,7 @@ class ProductsCubit extends Cubit<ProductsState> {
   final GetProducts _getProducts;
 
   ProductsCubit(this._getProducts) : super(ProductsInitial());
+  int productQuantity = 1;
 
   Future<void> getProducts({String? categoryId}) async {
     emit(GetProductsLoading());
@@ -16,5 +17,10 @@ class ProductsCubit extends Cubit<ProductsState> {
       (failure) => emit(GetProductsError(failure.message)),
       (products) => emit(GetProductsSuccess(products)),
     );
+  }
+
+  void changeProductQuantity(int quantity) {
+    productQuantity = quantity;
+    emit(ProductQuantityChanged());
   }
 }

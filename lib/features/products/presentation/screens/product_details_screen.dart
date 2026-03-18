@@ -1,15 +1,20 @@
+import 'package:ecommerce/core/di/service_locator.dart';
 import 'package:ecommerce/core/resources/assets_manager.dart';
 import 'package:ecommerce/core/resources/color_manager.dart';
 import 'package:ecommerce/core/resources/styles_manager.dart';
 import 'package:ecommerce/core/widgets/custom_elevated_button.dart';
 import 'package:ecommerce/core/widgets/product_counter.dart';
+import 'package:ecommerce/features/cart/presentation/cubit/cart_cubit.dart';
 import 'package:ecommerce/features/products/domain/entities/product.dart';
+import 'package:ecommerce/features/products/presentation/cubit/products_cubit.dart';
+import 'package:ecommerce/features/products/presentation/cubit/products_states.dart';
 import 'package:ecommerce/features/products/presentation/widgets/product_description.dart';
 import 'package:ecommerce/features/products/presentation/widgets/product_image.dart';
 import 'package:ecommerce/features/products/presentation/widgets/product_label.dart';
 import 'package:ecommerce/features/products/presentation/widgets/product_rating.dart';
 import 'package:ecommerce/features/products/presentation/widgets/product_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
@@ -20,7 +25,7 @@ class ProductDetailsScreen extends StatefulWidget {
 }
 
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
-  int _quantity = 1;
+  final _productsCubit = serviceLocator.get<ProductsCubit>();
 
   @override
   Widget build(BuildContext context) {
@@ -84,13 +89,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     ),
                   ),
                   ProductCounter(
-                    initialValue: _quantity,
-                    onIncrement: (value) {
-                      _quantity = value;
-                    },
-                    onDecrement: (value) {
-                      _quantity = value;
-                    },
+                    initialValue: _productsCubit.productQuantity,
+                    onIncrement: _productsCubit.changeProductQuantity,
+                    onDecrement: _productsCubit.changeProductQuantity,
                   ),
                 ],
               ),
@@ -108,11 +109,18 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         ).copyWith(fontSize: 18.sp),
                       ),
                       SizedBox(height: 12.h),
-                      Text(
-                        'EGP ${_quantity * (product.priceAfterDiscount ?? product.price)}',
-                        style: getMediumStyle(
-                          color: ColorManager.appBarTitle,
-                        ).copyWith(fontSize: 18.sp),
+                      BlocProvider(
+                        create: (_) => _productsCubit,
+                        child: BlocBuilder<ProductsCubit, ProductsState>(
+                          builder: (context, state) {
+                            return Text(
+                              'EGP ${_productsCubit.productQuantity * (product.priceAfterDiscount ?? product.price)}',
+                              style: getMediumStyle(
+                                color: ColorManager.appBarTitle,
+                              ).copyWith(fontSize: 18.sp),
+                            );
+                          },
+                        ),
                       ),
                     ],
                   ),
@@ -120,7 +128,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   Expanded(
                     child: CustomElevatedButton(
                       label: 'Add to cart',
-                      onTap: () {},
+                      onTap: () =>
+                          context.read<CartCubit>().addProduct(product.id),
                       prefixIcon: const Icon(
                         Icons.add_shopping_cart_outlined,
                         color: ColorManager.white,

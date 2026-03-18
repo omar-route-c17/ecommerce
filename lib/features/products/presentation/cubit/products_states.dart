@@ -17,3 +17,5 @@ class GetProductsError extends ProductsState {
 
   GetProductsError(this.message);
 }
+
+class ProductQuantityChanged extends ProductsState {}

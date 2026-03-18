@@ -6,14 +6,20 @@ import 'package:ecommerce/core/resources/styles_manager.dart';
 import 'package:ecommerce/core/resources/values_manager.dart';
 import 'package:ecommerce/core/routes/routes.dart';
 import 'package:ecommerce/core/widgets/product_counter.dart';
+import 'package:ecommerce/features/cart/domain/entities/cart_item_data.dart';
+import 'package:ecommerce/features/cart/presentation/cubit/cart_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CartItem extends StatelessWidget {
-  const CartItem();
+  const CartItem(this.data);
+
+  final CartItemData data;
 
   @override
   Widget build(BuildContext context) {
+    final cartCubit = context.read<CartCubit>();
     final bool isPortrait =
         MediaQuery.of(context).orientation == Orientation.portrait;
     final width = MediaQuery.sizeOf(context).width;
@@ -38,8 +44,7 @@ class CartItem extends StatelessWidget {
                 ),
               ),
               child: CachedNetworkImage(
-                imageUrl:
-                    'https://pl.kicksmaniac.com/zdjecia/2022/08/23/508/43/NIKE_AIR_JORDAN_1_RETRO_HIGH_GS_RARE_AIR_MAX_ORANGE-mini.jpg',
+                imageUrl: data.product.imageCoverURL,
                 fit: BoxFit.cover,
                 height: isPortrait ? height * 0.142 : height * 0.23,
                 width: isPortrait ? width * 0.29 : 165.w,
@@ -60,7 +65,7 @@ class CartItem extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            'Nike Air Jordon Nike shoes flexible for wo..',
+                            data.product.title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: getBoldStyle(
@@ -70,7 +75,7 @@ class CartItem extends StatelessWidget {
                           ),
                         ),
                         InkWell(
-                          onTap: () {},
+                          onTap: () => cartCubit.removeProduct(data.product.id),
                           child: Image.asset(
                             IconsAssets.delete,
                             color: ColorManager.text,
@@ -84,7 +89,7 @@ class CartItem extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            'EGP 399',
+                            'EGP ${data.price}',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: getBoldStyle(
@@ -94,9 +99,11 @@ class CartItem extends StatelessWidget {
                           ),
                         ),
                         ProductCounter(
-                          initialValue: 1,
-                          onIncrement: (quantity) {},
-                          onDecrement: (quantity) {},
+                          initialValue: data.count,
+                          onIncrement: (quantity) => cartCubit
+                              .updateProductQuantity(data.product.id, quantity),
+                          onDecrement: (quantity) => cartCubit
+                              .updateProductQuantity(data.product.id, quantity),
                         ),
                       ],
                     ),
